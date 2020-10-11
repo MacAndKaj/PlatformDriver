@@ -1,0 +1,13 @@
+#======== directories =========
+Debug/
+Drivers/
+startup/
+
+#========== files =============
+*.pdf
+*.ld
+*.launch
+
+#======= hidden files =========
+.*
+!/.gitignore
