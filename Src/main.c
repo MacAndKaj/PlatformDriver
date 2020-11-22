@@ -27,7 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <boolean.h>
-#include <motor.h>
+#include <init.h>
 
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -39,8 +39,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ONE_WORD 1
-#define SPEED_UPDATE_FREQ 100.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +49,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-double speedUpdateTime = 1./SPEED_UPDATE_FREQ;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,24 +57,12 @@ void SystemClock_Config(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    switch (GPIO_Pin)
-    {
-        case LeftMotorEncoderB_Pin:
-            updateLeftMotorParameters();
-            break;
-        case RightMotorEncoderB_Pin:
-            updateRightMotorParameters();
-            break;
-    }
+    onExtInterrupt(GPIO_Pin);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    if (htim->Instance == TIM17)
-    {
-        updateSpeed(&rightMotorHandle, speedUpdateTime);
-        updateSpeed(&leftMotorHandle, speedUpdateTime);
-    }
+    onPeriodElapsedCallback(htim);
 }
 /* USER CODE END PFP */
 
@@ -93,7 +78,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+    int fail = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -102,8 +87,12 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-    initializeLeftMotor();
-    initializeRightMotor();
+    fail = init_MotorDriver();
+    if(fail)
+    {
+        printf("Motor driver initialization failed!\r\n");
+        return 1;
+    }
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -121,10 +110,12 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-    HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, &leftMotorHandle.controller.pwmDuty, ONE_WORD);
-    HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1, &rightMotorHandle.controller.pwmDuty, ONE_WORD);
-    HAL_TIM_Base_Start_IT(&htim17);
-
+    fail = init_Peripheries();
+    if (fail)
+    {
+        printf("Peripheries initialization failed!\r\n");
+        return 1;
+    }
 
   /* USER CODE END 2 */
 
@@ -132,10 +123,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
     while (TRUE)
     {
-        printf("L-speed: %f| pulses: %ld \r\n", getSpeed(&leftMotorHandle), getPulses(&leftMotorHandle));
-        printf("R-speed: %f| pulses: %ld \r\n", getSpeed(&rightMotorHandle), getPulses(&rightMotorHandle));
-        HAL_Delay(1000);
-    /* USER CODE END WHILE */
+        onRun();
+        /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     }

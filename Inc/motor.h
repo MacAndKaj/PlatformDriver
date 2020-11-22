@@ -13,21 +13,14 @@
 #include <stdint.h>
 
 
-#define PULSES_PER_ROUND 1920.
-#define FORWARD 1
-#define BACKWARD 0
-
 /// Struct for read informations about motor.
 typedef struct Motor
 {
-    uint8_t updateFlag;       /// Flag used to signalize update of speed internal event.
-    double speed;           /// Speed of motor in radians per second.
-    int32_t pulses;     /// Actual number of pulses read from encoder.
-	uint8_t direction;        /// Actual direction of motor.
-	struct {
-        uint32_t pwmDuty;
-        GPIO_PinState lastPinAEncoderState;
-	} controller;
+    uint8_t updateFlag;                 /// Flag used to signalize update of speed internal event.
+    double speed;                       /// Speed of motor in radians per second.
+    int32_t pulses;                     /// Actual number of pulses read from encoder.
+	uint8_t direction;                  /// Actual direction of motor.
+    GPIO_PinState lastPinAEncoderState; /// Last state of encoder A pin
 } MotorHandle;
 
 /**
@@ -43,7 +36,7 @@ extern MotorHandle leftMotorHandle;
 extern MotorHandle rightMotorHandle;
 
 /**
-  ******************************************************************************
+  **************************rightMotorHandle****************************************************
   *
   * Global variables externs end.
   *
@@ -83,16 +76,6 @@ void setSpeed(MotorHandle* handle, double newSpeed);
 /// \return [double] angular speed of motor
 double getSpeed(const MotorHandle *handle);
 
-/// Sets pwm duty value in MotorHandle struct.
-/// \param handle [struct Motor ptr]
-/// \param newPwmDuty [uint32_t] new PWM duty value
-void setPwmDuty(MotorHandle *handle, uint32_t newPwmDuty);
-
-/// Returns pwm duty value from MotorHandle struct.
-/// \param handle [struct Motor ptr]
-/// \return [uint32_t] value of pwm duty
-uint32_t getPwmDuty(const MotorHandle *handle);
-
 /// Disables flag that signals needed update of motor speed.
 /// \param handle [struct Motor ptr]
 void enableSpeedUpdateFlag(MotorHandle *handle);
@@ -126,12 +109,6 @@ void Motor_Init(MotorHandle* handle);
 
 void initializeLeftMotor();
 void initializeRightMotor();
-
-void LeftMotor_Backward();
-void LeftMotor_Forward();
-
-void RightMotor_Forward();
-void RightMotor_Backward();
 
 void updateLeftMotorParameters();
 void updateRightMotorParameters();

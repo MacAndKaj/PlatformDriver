@@ -6,13 +6,13 @@
   * @brief          : Sources for motor.h file.
   ******************************************************************************
   */
+#include <boolean.h>
+#include <defs.h>
 #include <motor.h>
 
-#include <boolean.h>
+#include <stm32f0xx_hal.h>
 
 #include <math.h>
-
-#include <stm32f0xx_hal.h>
 
 /**
   ******************************************************************************
@@ -67,16 +67,6 @@ double getSpeed(const MotorHandle *handle)
     return handle->speed;
 }
 
-void setPwmDuty(MotorHandle *handle, uint32_t newPwmDuty)
-{
-    handle->controller.pwmDuty = newPwmDuty;
-}
-
-uint32_t getPwmDuty(const MotorHandle *handle)
-{
-    return handle->controller.pwmDuty;
-}
-
 void enableSpeedUpdateFlag(MotorHandle *handle)
 {
     handle->updateFlag = TRUE;
@@ -107,7 +97,6 @@ void Motor_Init(MotorHandle *handle)
     setForward(handle);
     setPulses(handle, 0);
     setSpeed(handle, 0);
-    setPwmDuty(handle, 0);
     disableSpeedUpdateFlag(handle);
 }
 
@@ -122,51 +111,13 @@ void Motor_Init(MotorHandle *handle)
 void initializeLeftMotor()
 {
     Motor_Init(&leftMotorHandle);
-    LeftMotor_Forward();
     leftMotorEncoderA_PinLastState = HAL_GPIO_ReadPin(LeftMotorEncoderA_GPIO_Port, LeftMotorEncoderA_Pin);
 }
 
 void initializeRightMotor()
 {
     Motor_Init(&rightMotorHandle);
-    RightMotor_Forward();
     rightMotorEncoderA_PinLastState = HAL_GPIO_ReadPin(RightMotorEncoderA_GPIO_Port, RightMotorEncoderA_Pin);
-}
-
-void LeftMotor_Backward()
-{
-    uint32_t pwm_duty_temp = getPwmDuty(&leftMotorHandle);
-    setPwmDuty(&leftMotorHandle, 0);
-    HAL_GPIO_WritePin(LeftMotorIn1_GPIO_Port, LeftMotorIn1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(LeftMotorIn2_GPIO_Port, LeftMotorIn2_Pin, GPIO_PIN_RESET);
-    setPwmDuty(&leftMotorHandle, pwm_duty_temp);
-}
-
-void LeftMotor_Forward()
-{
-    uint32_t pwm_duty_temp = getPwmDuty(&leftMotorHandle);
-    setPwmDuty(&leftMotorHandle, 0);
-    HAL_GPIO_WritePin(LeftMotorIn1_GPIO_Port, LeftMotorIn1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LeftMotorIn2_GPIO_Port, LeftMotorIn2_Pin, GPIO_PIN_SET);
-    setPwmDuty(&leftMotorHandle, pwm_duty_temp);
-}
-
-void RightMotor_Forward()
-{
-    uint32_t pwm_duty_temp = getPwmDuty(&rightMotorHandle);
-    setPwmDuty(&rightMotorHandle, 0);
-    HAL_GPIO_WritePin(RightMotorIn1_GPIO_Port, RightMotorIn1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(RightMotorIn2_GPIO_Port, RightMotorIn2_Pin, GPIO_PIN_RESET);
-    setPwmDuty(&rightMotorHandle, pwm_duty_temp);
-}
-
-void RightMotor_Backward()
-{
-    uint32_t pwm_duty_temp = getPwmDuty(&rightMotorHandle);
-    setPwmDuty(&rightMotorHandle, 0);
-    HAL_GPIO_WritePin(RightMotorIn1_GPIO_Port, RightMotorIn1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(RightMotorIn2_GPIO_Port, RightMotorIn2_Pin, GPIO_PIN_SET);
-    setPwmDuty(&rightMotorHandle, pwm_duty_temp);
 }
 
 void updateLeftMotorParameters()
