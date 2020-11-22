@@ -17,7 +17,6 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
@@ -27,7 +26,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <boolean.h>
+#include <motor.h>
 
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,6 +39,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ONE_WORD 1
+#define SPEED_UPDATE_FREQ 100.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -47,14 +51,34 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t pwm_duty;
-volatile int flag;
+double speedUpdateTime = 1./SPEED_UPDATE_FREQ;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    switch (GPIO_Pin)
+    {
+        case LeftMotorEncoderB_Pin:
+            updateLeftMotorParameters();
+            break;
+        case RightMotorEncoderB_Pin:
+            updateRightMotorParameters();
+            break;
+    }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM17)
+    {
+        updateSpeed(&rightMotorHandle, speedUpdateTime);
+        updateSpeed(&leftMotorHandle, speedUpdateTime);
+    }
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -78,7 +102,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+    initializeLeftMotor();
+    initializeRightMotor();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -93,50 +118,27 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_WritePin(MotorWireGreen_GPIO_Port, MotorWireGreen_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(MotorWireRed_GPIO_Port, MotorWireRed_Pin, GPIO_PIN_RESET);
+    HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, &leftMotorHandle.controller.pwmDuty, ONE_WORD);
+    HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1, &rightMotorHandle.controller.pwmDuty, ONE_WORD);
+    HAL_TIM_Base_Start_IT(&htim17);
 
-  pwm_duty = 0;
-  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pwm_duty);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
 
-  int up = 1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  if (up == 1)
-	  {
-		  if (pwm_duty > (TIM2_PERIOD - 100))
-		  {
-			  up = 0;
-		  }
-		  else
-		  {
-			  pwm_duty = pwm_duty + 100;
-		  }
-	  }
-	  else
-	  {
-		  if (pwm_duty == 100)
-		  {
-			  up = 1;
-		  }
-		  else
-		  {
-			  pwm_duty = pwm_duty - 100;
-		  }
-	  }
-	  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, pwm_duty);
-      HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    while (TRUE)
+    {
+        printf("L-speed: %f| pulses: %ld \r\n", getSpeed(&leftMotorHandle), getPulses(&leftMotorHandle));
+        printf("R-speed: %f| pulses: %ld \r\n", getSpeed(&rightMotorHandle), getPulses(&rightMotorHandle));
+        HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -150,7 +152,8 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
@@ -159,7 +162,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
@@ -190,7 +193,7 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+    /* User can add his own implementation to report the HAL error return state */
 
   /* USER CODE END Error_Handler_Debug */
 }
@@ -204,7 +207,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

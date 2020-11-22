@@ -60,14 +60,38 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define TIM2_PRESCALER 0
 #define TIM2_PERIOD 10000-1
+#define TIM3_PERIOD 10000-1
+#define TIM3_PRESCALER 0
+#define TIM17_PRESCALER 1000-1
+#define TIM17_PERIOD 480-1
 #define LED_Pin GPIO_PIN_5
 #define LED_GPIO_Port GPIOA
 #define MotorWireGreen_Pin GPIO_PIN_6
 #define MotorWireGreen_GPIO_Port GPIOA
-#define MotorPWM_Pin GPIO_PIN_10
-#define MotorPWM_GPIO_Port GPIOB
-#define MotorWireRed_Pin GPIO_PIN_6
-#define MotorWireRed_GPIO_Port GPIOB
+#define LeftMotorPWM_Pin GPIO_PIN_10
+#define LeftMotorPWM_GPIO_Port GPIOB
+#define RightMotorEncoderA_Pin GPIO_PIN_6
+#define RightMotorEncoderA_GPIO_Port GPIOC
+#define LeftMotorIn1_Pin GPIO_PIN_7
+#define LeftMotorIn1_GPIO_Port GPIOC
+#define RightMotorEncoderB_Pin GPIO_PIN_8
+#define RightMotorEncoderB_GPIO_Port GPIOC
+#define RightMotorEncoderB_EXTI_IRQn EXTI4_15_IRQn
+#define RightMotorIn1_Pin GPIO_PIN_8
+#define RightMotorIn1_GPIO_Port GPIOA
+#define RightMotorIn2_Pin GPIO_PIN_9
+#define RightMotorIn2_GPIO_Port GPIOA
+#define LeftMotorEncoderB_Pin GPIO_PIN_10
+#define LeftMotorEncoderB_GPIO_Port GPIOC
+#define LeftMotorEncoderB_EXTI_IRQn EXTI4_15_IRQn
+#define LeftMotorEncoderA_Pin GPIO_PIN_12
+#define LeftMotorEncoderA_GPIO_Port GPIOC
+#define RightMotorPWM_Pin GPIO_PIN_4
+#define RightMotorPWM_GPIO_Port GPIOB
+#define LeftMotorIn2_Pin GPIO_PIN_6
+#define LeftMotorIn2_GPIO_Port GPIOB
+#define SpeedUpdatePin_Pin GPIO_PIN_9
+#define SpeedUpdatePin_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
