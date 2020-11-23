@@ -7,12 +7,12 @@
   *                   This file contains <what does the file contains>
   ******************************************************************************
   */
-#ifndef MOTORDRIVER_LOG_H
-#define MOTORDRIVER_LOG_H
+#ifndef MOTORDRIVER_PLATFORM_LOG_H
+#define MOTORDRIVER_PLATFORM_LOG_H
 
 /*
  *  Overriden system call _write(int file, char *ptr, int len)
  */
 int _write(int file, char *ptr, int len);
 
-#endif //MOTORDRIVER_LOG_H
+#endif //MOTORDRIVER_PLATFORM_LOG_H

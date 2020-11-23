@@ -26,8 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <boolean.h>
-#include <init.h>
+#include <platform/init.h>
 
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -121,13 +120,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    while (TRUE)
-    {
-        onRun();
+    onRun();
         /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    }
+
   /* USER CODE END 3 */
 }
 

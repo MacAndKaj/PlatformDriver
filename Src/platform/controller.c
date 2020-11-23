@@ -8,8 +8,9 @@
   ******************************************************************************
   */
 
-#include <controller.h>
-#include <defs.h>
+#include <platform/controller.h>
+#include <platform/defs.h>
+
 #include <main.h>
 
 ControllerHandle leftControllerHandle;
@@ -17,6 +18,10 @@ ControllerHandle rightControllerHandle;
 
 void setPwmDuty(ControllerHandle *handle, uint32_t newPwmDuty)
 {
+    if (newPwmDuty > PWM_PERIOD)
+    {
+        newPwmDuty = PWM_PERIOD;
+    }
     handle->pwmDuty = newPwmDuty;
 }
 
@@ -24,7 +29,6 @@ uint32_t getPwmDuty(const ControllerHandle *handle)
 {
     return handle->pwmDuty;
 }
-
 
 void setLeftDirection(uint8_t direction)
 {

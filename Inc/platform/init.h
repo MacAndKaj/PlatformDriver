@@ -7,8 +7,8 @@
   *                   This file contains general functions for MotorDriver.
   ******************************************************************************
   */
-#ifndef MOTORDRIVER_HAL_INIT_H
-#define MOTORDRIVER_HAL_INIT_H
+#ifndef MOTORDRIVER_PLATFORM_INIT_H
+#define MOTORDRIVER_PLATFORM_INIT_H
 
 #include <gpio.h>
 
@@ -29,4 +29,4 @@ void onRun();
 void onExtInterrupt(uint16_t GPIO_Pin);
 void onPeriodElapsedCallback(TIM_HandleTypeDef *htim);
 
-#endif //MOTORDRIVER_HAL_INIT_H
+#endif //MOTORDRIVER_PLATFORM_INIT_H

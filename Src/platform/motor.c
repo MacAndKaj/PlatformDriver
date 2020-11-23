@@ -6,9 +6,9 @@
   * @brief          : Sources for motor.h file.
   ******************************************************************************
   */
-#include <boolean.h>
-#include <defs.h>
-#include <motor.h>
+#include <platform/boolean.h>
+#include <platform/defs.h>
+#include <platform/motor.h>
 
 #include <stm32f0xx_hal.h>
 

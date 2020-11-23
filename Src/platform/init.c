@@ -8,14 +8,16 @@
   ******************************************************************************
   */
 
-#include <controller.h>
-#include <init.h>
-#include <log.h>
-#include <motor.h>
+#include <platform/boolean.h>
+#include <platform/controller.h>
+#include <platform/defs.h>
+#include <platform/init.h>
+#include <platform/motor.h>
+#include <platform/pid.h>
+
 #include <tim.h>
 
 #include <stdio.h>
-#include <defs.h>
 
 int init_Peripheries()
 {
@@ -53,9 +55,15 @@ int init_MotorDriver()
 
 void onRun()
 {
-    printf("L-speed: %f| pulses: %ld \r\n", getSpeed(&leftMotorHandle), getPulses(&leftMotorHandle));
-    printf("R-speed: %f| pulses: %ld \r\n", getSpeed(&rightMotorHandle), getPulses(&rightMotorHandle));
-    HAL_Delay(1000);
+    PID pid = {.kP = 2.,
+               .kI = 1.,
+               .kD = 1.};
+    while (TRUE)
+    {
+        printf("L-speed: %f| pulses: %ld \r\n", getSpeed(&leftMotorHandle), getPulses(&leftMotorHandle));
+        printf("R-speed: %f| pulses: %ld \r\n", getSpeed(&rightMotorHandle), getPulses(&rightMotorHandle));
+        HAL_Delay(1000);
+    }
 }
 
 void onExtInterrupt(uint16_t GPIO_Pin)

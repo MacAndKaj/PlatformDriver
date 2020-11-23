@@ -7,11 +7,22 @@
   *                   This file contains <what does the file contains>
   ******************************************************************************
   */
-#ifndef MOTORDRIVER_DEFS_H
-#define MOTORDRIVER_DEFS_H
+#ifndef MOTORDRIVER_PLATFORM_DEFS_H
+#define MOTORDRIVER_PLATFORM_DEFS_H
 
-#define PULSES_PER_ROUND 1920.
-#define FORWARD 1
+// Max value of counters for timers used in PWM generation.
+#define PWM_PERIOD 10000-1
+
+// Value for backward direction.
 #define BACKWARD 0
 
-#endif //MOTORDRIVER_DEFS_H
+// Value for forward direction.
+#define FORWARD 1
+
+// Amount of encoder pulses per round.
+#define PULSES_PER_ROUND 1920.
+
+// Radius of wheels[m].
+#define R 0.033
+
+#endif //MOTORDRIVER_PLATFORM_DEFS_H
