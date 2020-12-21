@@ -34,5 +34,6 @@ double getLastError(const PID* pidHandle);
 void setLastError(PID* pidHandle, double val);
 double getIntegral(const PID* pidHandle);
 void setIntegral(PID* pidHandle, double val);
+void resetPid(PID* pidHandle);
 
 #endif //MOTORDRIVER_PLATFORM_PID_H

@@ -63,6 +63,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     onPeriodElapsedCallback(htim);
 }
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    onRxCpltCallback(huart);
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -86,12 +91,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-    fail = init_MotorDriver();
-    if(fail)
-    {
-        printf("Motor driver initialization failed!\r\n");
-        return 1;
-    }
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -109,6 +108,13 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
+    fail = init_MotorDriver();
+    if(fail)
+    {
+        printf("Motor driver initialization failed!\r\n");
+        return 1;
+    }
+
     fail = init_Peripheries();
     if (fail)
     {
@@ -116,12 +122,13 @@ int main(void)
         return 1;
     }
 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
     onRun();
-        /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 

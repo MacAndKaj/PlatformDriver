@@ -8,7 +8,7 @@
   */
 #include <platform/boolean.h>
 #include <platform/defs.h>
-#include <platform/motor.h>
+#include <platform/motor_info.h>
 
 #include <stm32f0xx_hal.h>
 
@@ -23,8 +23,8 @@
   */
 GPIO_PinState leftMotorEncoderA_PinLastState;
 GPIO_PinState rightMotorEncoderA_PinLastState;
-MotorHandle leftMotorHandle;
-MotorHandle rightMotorHandle;
+MotorInfoHandle leftMotorHandle;
+MotorInfoHandle rightMotorHandle;
 /**
   ******************************************************************************
   *
@@ -32,57 +32,57 @@ MotorHandle rightMotorHandle;
   *
   *******************************************************************************
   */
-void setForward(MotorHandle *handle)
+void setForward(MotorInfoHandle *handle)
 {
     handle->direction = FORWARD;
 }
 
-int isForward(const MotorHandle *handle)
+int isForward(const MotorInfoHandle *handle)
 {
     return handle->direction == FORWARD;
 }
 
-void setBackward(MotorHandle *handle)
+void setBackward(MotorInfoHandle *handle)
 {
     handle->direction = BACKWARD;
 }
 
-void setPulses(MotorHandle *handle, int32_t newPulses)
+void setPulses(MotorInfoHandle *handle, int32_t newPulses)
 {
     handle->pulses = newPulses;
 }
 
-int32_t getPulses(const MotorHandle *handle)
+int32_t getPulses(const MotorInfoHandle *handle)
 {
     return handle->pulses;
 }
 
-void setSpeed(MotorHandle *handle, double newSpeed)
+void setSpeed(MotorInfoHandle *handle, double newSpeed)
 {
     handle->speed = newSpeed;
 }
 
-double getSpeed(const MotorHandle *handle)
+double getSpeed(const MotorInfoHandle *handle)
 {
     return handle->speed;
 }
 
-void enableSpeedUpdateFlag(MotorHandle *handle)
+void enableSpeedUpdateFlag(MotorInfoHandle *handle)
 {
     handle->updateFlag = TRUE;
 }
 
-void disableSpeedUpdateFlag(MotorHandle *handle)
+void disableSpeedUpdateFlag(MotorInfoHandle *handle)
 {
     handle->updateFlag = FALSE;
 }
 
-uint8_t isSpeedUpdateFlagSet(MotorHandle *handle)
+uint8_t isSpeedUpdateFlagSet(MotorInfoHandle *handle)
 {
     return handle->updateFlag;
 }
 
-void updateSpeed(MotorHandle *handle, double t)
+void updateSpeed(MotorInfoHandle *handle, double t)
 {
     if (t == 0.) return;
 
@@ -92,7 +92,7 @@ void updateSpeed(MotorHandle *handle, double t)
     setSpeed(handle, 2.*M_PI*rounds / t);
 }
 
-void Motor_Init(MotorHandle *handle)
+void Motor_Init(MotorInfoHandle *handle)
 {
     setForward(handle);
     setPulses(handle, 0);

@@ -8,10 +8,12 @@
   ******************************************************************************
   */
 
-#include <platform/controller.h>
+#include <platform/motor_control.h>
 #include <platform/defs.h>
 
 #include <main.h>
+
+#include <stdlib.h>
 
 ControllerHandle leftControllerHandle;
 ControllerHandle rightControllerHandle;
@@ -62,4 +64,31 @@ void setRightDirection(uint8_t direction)
         HAL_GPIO_WritePin(RightMotorIn2_GPIO_Port, RightMotorIn2_Pin, GPIO_PIN_SET);
     }
     setPwmDuty(&rightControllerHandle, pwm_duty_temp);
+}
+
+void setLeftPwm(int64_t newPwmDuty)
+{
+    if (newPwmDuty < 0)
+    {
+        setLeftDirection(BACKWARD);
+    }
+    else
+    {
+        setLeftDirection(FORWARD);
+    }
+    setPwmDuty(&leftControllerHandle, llabs(newPwmDuty));
+}
+
+
+void setRightPwm(int64_t newPwmDuty)
+{
+    if (newPwmDuty < 0)
+    {
+        setRightDirection(BACKWARD);
+    }
+    else
+    {
+        setRightDirection(FORWARD);
+    }
+    setPwmDuty(&rightControllerHandle, llabs(newPwmDuty));
 }

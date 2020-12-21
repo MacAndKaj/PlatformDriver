@@ -59,11 +59,14 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define TIM2_PRESCALER 0
-#define TIM2_PERIOD PWM_PERIOD
-#define TIM3_PERIOD PWM_PERIOD
+#define TIM2_PERIOD 10000-1
+#define TIM3_PERIOD 10000-1
 #define TIM3_PRESCALER 0
 #define TIM17_PRESCALER 1000-1
 #define TIM17_PERIOD 480-1
+#define UserButton_Pin GPIO_PIN_13
+#define UserButton_GPIO_Port GPIOC
+#define UserButton_EXTI_IRQn EXTI4_15_IRQn
 #define LED_Pin GPIO_PIN_5
 #define LED_GPIO_Port GPIOA
 #define MotorWireGreen_Pin GPIO_PIN_6

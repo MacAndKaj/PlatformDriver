@@ -18,7 +18,7 @@ double evaluate(PID* pid, double error, double dt)
     assert(dt != 0.);
 
     double derivative = (error - getLastError(pid))/dt;
-    double integral =  (getIntegral(pid) + error)*dt;
+    double integral =  getIntegral(pid) + error*dt;
 
     double output = (getKP(pid) * error) + (getKI(pid) * integral) + (getKD(pid) * derivative);
 
@@ -61,4 +61,10 @@ double getIntegral(const PID* pidHandle)
 void setIntegral(PID* pidHandle, double val)
 {
     pidHandle->vI = val;
+}
+
+void resetPid(PID* pidHandle)
+{
+    pidHandle->vI = 0;
+    pidHandle->lastError = 0;
 }

@@ -5,8 +5,8 @@
   *                   This file contains the motor struct definition.
   ******************************************************************************
   */
-#ifndef MOTORDRIVER_MOTOR_H
-#define MOTORDRIVER_MOTOR_H
+#ifndef MOTORDRIVER_MOTOR_INFO_H
+#define MOTORDRIVER_MOTOR_INFO_H
 
 #include <gpio.h>
 
@@ -14,14 +14,14 @@
 
 
 /// Struct for read informations about motor.
-typedef struct Motor
+typedef struct MotorInfo
 {
     uint8_t updateFlag;                 /// Flag used to signalize update of speed internal event.
     double speed;                       /// Speed of motor in radians per second.
     int32_t pulses;                     /// Actual number of pulses read from encoder.
 	uint8_t direction;                  /// Actual direction of motor.
     GPIO_PinState lastPinAEncoderState; /// Last state of encoder A pin
-} MotorHandle;
+} MotorInfoHandle;
 
 /**
   ******************************************************************************
@@ -32,8 +32,8 @@ typedef struct Motor
   */
 extern GPIO_PinState leftMotorEncoderA_PinLastState;
 extern GPIO_PinState rightMotorEncoderA_PinLastState;
-extern MotorHandle leftMotorHandle;
-extern MotorHandle rightMotorHandle;
+extern MotorInfoHandle leftMotorHandle;
+extern MotorInfoHandle rightMotorHandle;
 
 /**
   **************************rightMotorHandle****************************************************
@@ -45,58 +45,58 @@ extern MotorHandle rightMotorHandle;
 
 /// Function sets forward direction in struct Motor handle.
 /// \param handle: [struct Motor ptr]
-void setForward(MotorHandle* handle);
+void setForward(MotorInfoHandle* handle);
 
 /// Function used to check direction of working motor.
 /// \param handle: [struct Motor ptr]
 /// \return [int] 1 if forward, 0 othewrwise
-int isForward(const MotorHandle* handle);
+int isForward(const MotorInfoHandle* handle);
 
 /// Function sets backward direction in struct Motor handle.
 /// \param handle: [struct Motor ptr]
-void setBackward(MotorHandle* handle);
+void setBackward(MotorInfoHandle* handle);
 
 /// Function sets number of encoder pulses in struct Motor handle.
 /// \param handle: [struct Motor ptr]
 /// \param newPulses: [int32_t] new number of pulses
-void setPulses(MotorHandle* handle, int32_t newPulses);
+void setPulses(MotorInfoHandle* handle, int32_t newPulses);
 
 /// Function to read number of pulses on encoder for motor
 /// \param handle: [struct Motor ptr]
 /// \return [int32_t] number of pulses on encoder
-int32_t getPulses(const MotorHandle* handle);
+int32_t getPulses(const MotorInfoHandle* handle);
 
 /// Function sets speed of motor in struct Motor handle.
 /// \param handle: [struct Motor ptr]
 /// \param newSpeed: [double] new speed in rounds/second
-void setSpeed(MotorHandle* handle, double newSpeed);
+void setSpeed(MotorInfoHandle* handle, double newSpeed);
 
 /// Returns angular speed of motor in radians per second
 /// \param handle [struct Motor ptr]
 /// \return [double] angular speed of motor
-double getSpeed(const MotorHandle *handle);
+double getSpeed(const MotorInfoHandle *handle);
 
 /// Disables flag that signals needed update of motor speed.
 /// \param handle [struct Motor ptr]
-void enableSpeedUpdateFlag(MotorHandle *handle);
+void enableSpeedUpdateFlag(MotorInfoHandle *handle);
 
 /// Disables flag that signals needed update of motor speed.
 /// \param handle [struct Motor ptr]
-void disableSpeedUpdateFlag(MotorHandle *handle);
+void disableSpeedUpdateFlag(MotorInfoHandle *handle);
 
 /// Function for checking if speed update flag is set
 /// \param handle [struct Motor ptr]
 /// \return [uint8_t] update flag: 1-set, 0-not set
-uint8_t isSpeedUpdateFlagSet(MotorHandle *handle);
+uint8_t isSpeedUpdateFlagSet(MotorInfoHandle *handle);
 
 /// Function used to update speed value in MotorHandle structure.
 /// \param handle [struct Motor ptr]
 /// \param time [double] time in seconds
-void updateSpeed(MotorHandle *handle, double time);
+void updateSpeed(MotorInfoHandle *handle, double time);
 
 /// Initialize struct Motor handle. Sets all parameters to 0.
 /// \param handle: [struct Motor ptr]
-void Motor_Init(MotorHandle* handle);
+void Motor_Init(MotorInfoHandle* handle);
 
 /**
   ******************************************************************************
@@ -120,4 +120,4 @@ void updateRightMotorParameters();
   *******************************************************************************
   */
 
-#endif //MOTORDRIVER_MOTOR_H
+#endif //MOTORDRIVER_MOTOR_INFO_H

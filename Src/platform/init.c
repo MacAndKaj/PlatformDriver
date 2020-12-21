@@ -9,15 +9,19 @@
   */
 
 #include <platform/boolean.h>
-#include <platform/controller.h>
+#include <platform/motor_control.h>
 #include <platform/defs.h>
 #include <platform/init.h>
-#include <platform/motor.h>
+#include <platform/log.h>
+#include <platform/motor_info.h>
 #include <platform/pid.h>
 
 #include <tim.h>
 
 #include <stdio.h>
+
+double speed = 0;
+
 
 int init_Peripheries()
 {
@@ -40,6 +44,9 @@ int init_Peripheries()
         return 1;
     }
 
+    noNewRxData();
+    startUartRx();
+
     return 0;
 }
 
@@ -52,17 +59,62 @@ int init_MotorDriver()
     return 0;
 }
 
+void toggleSpeed()
+{
+    if (speed == 0)
+    {
+        setPwmDuty(&leftControllerHandle, PWM_PERIOD);
+//        speed = 5;
+    }
+    else
+    {
+        setPwmDuty(&leftControllerHandle, 0);
+//        speed = 0;
+    }
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+}
 
 void onRun()
 {
-    PID pid = {.kP = 2.,
-               .kI = 1.,
-               .kD = 1.};
+    double error = 0.;
+    PID pid = {.kP = 4000.,
+        .kI = 150.,
+        .kD = 30.};
+
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    HAL_Delay(1000);
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+    int8_t speedInt;
+
     while (TRUE)
     {
-        printf("L-speed: %f| pulses: %ld \r\n", getSpeed(&leftMotorHandle), getPulses(&leftMotorHandle));
-        printf("R-speed: %f| pulses: %ld \r\n", getSpeed(&rightMotorHandle), getPulses(&rightMotorHandle));
-        HAL_Delay(1000);
+        if (isSpeedUpdateFlagSet(&leftMotorHandle))
+        {
+            disableSpeedUpdateFlag(&leftMotorHandle);
+            disableSpeedUpdateFlag(&rightMotorHandle);
+
+//            printf("speed: %f| pwm: %ld | error: %f \n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), error);
+            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speed);
+
+//            error = speed - getSpeed(&leftMotorHandle);
+
+//            setLeftPwm(evaluate(&pid, error, speedUpdateTime));
+        }
+
+        if (isNewData())
+        {
+            speedInt = rxBuffer.rxData[0];
+            if (speedInt < 0)
+            {
+                speed = speedInt - (rxBuffer.rxData[1] * 0.01);
+            }
+            else
+            {
+                speed = speedInt + (rxBuffer.rxData[1] * 0.01);
+            }
+            noNewRxData();
+        }
     }
 }
 
@@ -76,6 +128,9 @@ void onExtInterrupt(uint16_t GPIO_Pin)
         case RightMotorEncoderB_Pin:
             updateRightMotorParameters();
             break;
+        case UserButton_Pin:
+            toggleSpeed();
+            break;
     }
 }
 
@@ -85,5 +140,16 @@ void onPeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
         updateSpeed(&rightMotorHandle, speedUpdateTime);
         updateSpeed(&leftMotorHandle, speedUpdateTime);
+        enableSpeedUpdateFlag(&rightMotorHandle);
+        enableSpeedUpdateFlag(&leftMotorHandle);
+    }
+}
+
+void onRxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        newRxData();
+        startUartRx();
     }
 }
