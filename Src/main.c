@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <platform/init.h>
+#include <main/init.h>
 
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -115,7 +115,7 @@ int main(void)
         return 1;
     }
 
-    fail = init_Peripheries();
+    fail = init_Modules();
     if (fail)
     {
         printf("Peripheries initialization failed!\r\n");

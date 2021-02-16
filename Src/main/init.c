@@ -8,11 +8,12 @@
   ******************************************************************************
   */
 
-#include <platform/boolean.h>
+#include <com/com.h>
+#include <main/boolean.h>
+#include <main/defs.h>
+#include <main/init.h>
+#include <main/log.h>
 #include <platform/motor_control.h>
-#include <platform/defs.h>
-#include <platform/init.h>
-#include <platform/log.h>
 #include <platform/motor_info.h>
 #include <platform/pid.h>
 
@@ -21,9 +22,10 @@
 #include <stdio.h>
 
 double speed = 0;
+CommunicationContext communicationContext;
 
 
-int init_Peripheries()
+int init_Modules()
 {
     HAL_StatusTypeDef state;
     state = HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, &leftControllerHandle.pwmDuty, ONE_WORD);
@@ -44,8 +46,11 @@ int init_Peripheries()
         return 1;
     }
 
-    noNewRxData();
-    startUartRx();
+    state = HAL_TIM_Base_Start_IT(&htim17);
+    if (state != HAL_OK)
+    {
+        return 1;
+    }
 
     return 0;
 }
@@ -61,7 +66,8 @@ int init_MotorDriver()
 
 void toggleSpeed()
 {
-    if (speed == 0)
+    if(getPwmDuty(&leftControllerHandle) == 0)
+//    if (speed == 0)
     {
         setPwmDuty(&leftControllerHandle, PWM_PERIOD);
 //        speed = 5;
@@ -87,8 +93,11 @@ void onRun()
 
     int8_t speedInt;
 
+    initCom(&communicationContext);
+
     while (TRUE)
     {
+        workCom(&communicationContext);
         if (isSpeedUpdateFlagSet(&leftMotorHandle))
         {
             disableSpeedUpdateFlag(&leftMotorHandle);
@@ -100,20 +109,6 @@ void onRun()
 //            error = speed - getSpeed(&leftMotorHandle);
 
 //            setLeftPwm(evaluate(&pid, error, speedUpdateTime));
-        }
-
-        if (isNewData())
-        {
-            speedInt = rxBuffer.rxData[0];
-            if (speedInt < 0)
-            {
-                speed = speedInt - (rxBuffer.rxData[1] * 0.01);
-            }
-            else
-            {
-                speed = speedInt + (rxBuffer.rxData[1] * 0.01);
-            }
-            noNewRxData();
         }
     }
 }
@@ -134,6 +129,7 @@ void onExtInterrupt(uint16_t GPIO_Pin)
     }
 }
 
+// Callbacks with 1kHz frequency
 void onPeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM17)
@@ -147,9 +143,5 @@ void onPeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void onRxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == USART2)
-    {
-        newRxData();
-        startUartRx();
-    }
+    comReceiveCallback(huart, &communicationContext);
 }

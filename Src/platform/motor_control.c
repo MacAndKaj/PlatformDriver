@@ -9,7 +9,7 @@
   */
 
 #include <platform/motor_control.h>
-#include <platform/defs.h>
+#include <main/defs.h>
 
 #include <main.h>
 

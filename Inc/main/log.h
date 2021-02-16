@@ -10,24 +10,11 @@
 #ifndef MOTORDRIVER_PLATFORM_LOG_H
 #define MOTORDRIVER_PLATFORM_LOG_H
 
-#include <stdint.h>
-
-typedef struct UartData
-{
-    uint8_t newData;
-    uint8_t rxData[2];
-} UartBuffer;
-
-extern UartBuffer rxBuffer;
+#include <stdio.h>
 
 /*
  *  Overriden system call _write(int file, char *ptr, int len)
  */
 int _write(int file, char *ptr, int len);
-
-void newRxData();
-void startUartRx();
-void noNewRxData();
-uint8_t isNewData();
 
 #endif //MOTORDRIVER_PLATFORM_LOG_H

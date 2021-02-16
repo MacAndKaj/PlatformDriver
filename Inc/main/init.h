@@ -19,7 +19,7 @@ static double speedUpdateTime = 1./SPEED_UPDATE_FREQ;
 
 /// Function initializing STM32 peripheries used in project.
 /// \return [int]: 0 if not error, 1 - otherwise
-int init_Peripheries();
+int init_Modules();
 
 /// Function initializing Motor Driver configuration.
 /// \return [int]: 0 if not error, 1 - otherwise
