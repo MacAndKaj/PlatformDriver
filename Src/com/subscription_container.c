@@ -21,7 +21,7 @@ struct Subscription
 
 struct SubscriptionContainer
 {
-    struct Subscription *first;
+    struct Subscription* first;
     uint16_t subscriptionsCounter;
 };
 
@@ -35,7 +35,7 @@ SubscriptionContainer* createSubscriptionContainer()
 
 uint16_t addSubscription(SubscriptionContainer* container, uint8_t messageId, MessageHandler handler)
 {
-    struct Subscription *current = container->first;
+    struct Subscription* current = container->first;
     while (current != NULL)
     {
         current = current->next;
@@ -95,4 +95,22 @@ int subscriptionExists(SubscriptionContainer* container, uint8_t messageId)
     return SUBSCRIPTION_DOES_NOT_EXIT;
 }
 
+struct HandlersList getHandlersForMessageId(SubscriptionContainer* container, uint8_t messageId)
+{
+    struct HandlersList list = {.head=NULL};
+    struct HandlerNode** currentHandlerNode = &list.head;
+    struct Subscription* currentSubscription = container->first;
 
+    while (currentSubscription->next != NULL)
+    {
+        if (currentSubscription->messageId == messageId)
+        {
+            (*currentHandlerNode) = malloc(sizeof(struct HandlerNode));
+            (*currentHandlerNode)->messageHandler = currentSubscription->handlerPtr;
+            (*currentHandlerNode)->next = NULL;
+            (*currentHandlerNode) = (*currentHandlerNode)->next;
+        }
+    }
+
+    return list;
+}

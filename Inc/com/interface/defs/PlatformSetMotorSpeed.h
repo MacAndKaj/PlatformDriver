@@ -17,14 +17,14 @@
 struct PlatformSetMotorSpeedReq
 {
     uint8_t motor;
+    int8_t speedI;
+    uint8_t speedF;
 };
 typedef struct PlatformSetMotorSpeedReq PlatformSetMotorSpeedReq;
 
 struct PlatformSetMotorSpeedResp
 {
     uint8_t motor;
-    int8_t speedI;
-    uint8_t speedF;
     enum Status status;
 };
 typedef struct PlatformSetMotorSpeedResp PlatformSetMotorSpeedResp;

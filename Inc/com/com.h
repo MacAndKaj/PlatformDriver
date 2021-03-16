@@ -34,8 +34,8 @@ typedef struct CommunicationContext CommunicationContext;
 void initCom(CommunicationContext* communicationContext);
 void workCom(CommunicationContext* communicationContext);
 
-uint16_t subscribe(uint8_t id, void *(Message));
-void unsubscribe(uint16_t subscriptionId);
+uint16_t subscribe(CommunicationContext* communicationContext, uint8_t id, MessageHandler messageHandler);
+void unsubscribe(CommunicationContext* communicationContext, uint16_t subscriptionId);
 
 void comReceiveCallback(UART_HandleTypeDef *huart, CommunicationContext* communicationContext);
 

@@ -26,7 +26,7 @@ int validateCtrlData(MessageControl* messageControl, const uint8_t data[HEADER_S
 
 uint16_t getMessageSize(uint8_t id)
 {
-    Node* idAndSize = find(id);
+    Node* idAndSize = findSizeForMessageId(id);
     if (idAndSize != NULL)
     {
         return idAndSize->size;
@@ -54,14 +54,37 @@ void* deserialize(char* data, uint8_t id)
     return NULL;
 }
 
+uint16_t addSubscriptionForMessage(MessageControl* messageControl, uint8_t id, MessageHandler messageHandler)
+{
+    if (findSizeForMessageId(id) == NULL)
+    {
+        return -1;
+    }
+
+    return addSubscription(messageControl->subscriptionContainer, id, messageHandler);
+}
+
+void removeSubscriptionWithId(MessageControl* messageControl, uint16_t subscriptionId)
+{
+    removeSubscription(messageControl->subscriptionContainer, subscriptionId);
+}
+
 void processSubscriptions(MessageControl* messageControl)
 {
+    struct HandlersList handlersList;
     while (!isEmpty(messageControl->storage))
     {
         Message message = popMessage(messageControl->storage);
         if (subscriptionExists(messageControl->subscriptionContainer, message.messageId))
         {
-            //TODO: handle subscription
+            handlersList = getHandlersForMessageId(messageControl->subscriptionContainer, message.messageId);
+            struct HandlerNode* current = handlersList.head;
+
+            while (current != NULL)
+            {
+                current->messageHandler(&message);
+                current = current->next;
+            }
         }
     }
 

@@ -22,6 +22,6 @@ typedef struct
 
 extern Node map[MESSAGES_NUM];
 
-Node* find(uint8_t id);
+Node* findSizeForMessageId(uint8_t id);
 
 #endif //MOTORDRIVER_MESSAGES_SIZE_MAP_H

@@ -57,3 +57,8 @@ Message popMessage(MessageStorage* messageStorage)
 
     return temp;
 }
+
+int isEmpty(const MessageStorage* messageStorage)
+{
+    return messageStorage->firstMessage == NULL;
+}

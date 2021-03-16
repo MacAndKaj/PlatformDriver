@@ -38,6 +38,9 @@ char* serialize(void* resp, uint8_t id);
 
 void* deserialize(char* data, uint8_t id);
 
+uint16_t addSubscriptionForMessage(MessageControl* messageControl, uint8_t id,  MessageHandler messageHandler);
+void removeSubscriptionWithId(MessageControl* messageControl, uint16_t subscriptionId);
+
 void processSubscriptions(MessageControl* messageControl);
 
 #endif //MOTORDRIVER_MESSAGE_CONTROL_H

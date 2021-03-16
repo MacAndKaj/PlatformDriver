@@ -94,7 +94,7 @@ void workCom(CommunicationContext *communicationContext)
     clearBuffer(&communicationContext->rxBuffer);
     startUartRx(&communicationContext->rxBuffer, nextReadDataSize);
 
-
+    processSubscriptions(&communicationContext->msgControl);
 }
 
 void comReceiveCallback(UART_HandleTypeDef *huart, CommunicationContext *communicationContext)
@@ -105,6 +105,17 @@ void comReceiveCallback(UART_HandleTypeDef *huart, CommunicationContext *communi
     }
     newRxData(&communicationContext->rxBuffer);
 }
+
+uint16_t subscribe(CommunicationContext* communicationContext, uint8_t id, MessageHandler messageHandler)
+{
+    return addSubscriptionForMessage(&communicationContext->msgControl, id, messageHandler);
+}
+
+void unsubscribe(CommunicationContext* communicationContext, uint16_t subscriptionId)
+{
+    removeSubscriptionWithId(&communicationContext->msgControl, subscriptionId);
+}
+
 
 /*
  *  PUBLIC END
@@ -196,26 +207,6 @@ void processUserData(CommunicationContext* communicationContext)
     addMessage(communicationContext->msgControl.storage, &temp);
 }
 
-void proceedCallbacks(CommunicationContext* communicationContext)
-{
-    if ()
-    {
-
-    }
-}
-
 /*
  *  PRIVATE END
  */
-
-
-//speedInt = rxBuffer.rxData[0];
-//if (speedInt < 0)
-//{
-//speed = speedInt - (rxBuffer.rxData[1] * 0.01);
-//}
-//else
-//{
-//speed = speedInt + (rxBuffer.rxData[1] * 0.01);
-//}
-//

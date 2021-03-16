@@ -20,8 +20,10 @@
 #include <tim.h>
 
 #include <stdio.h>
+#include <com/interface/message_ids.h>
 
-double speed = 0;
+double speedLeft = 0;
+double speedRight = 0;
 CommunicationContext communicationContext;
 
 
@@ -64,20 +66,26 @@ int init_MotorDriver()
     return 0;
 }
 
-void toggleSpeed()
+double transformSpeed(int8_t speedInt, uint8_t speedFl)
 {
-    if(getPwmDuty(&leftControllerHandle) == 0)
-//    if (speed == 0)
+    if (speedInt < 0)
     {
-        setPwmDuty(&leftControllerHandle, PWM_PERIOD);
-//        speed = 5;
+        return speedInt - (speedFl * 0.01);
+    }
+    return speedInt + (speedFl * 0.01);
+}
+
+void toggleSpeed(Message* message)
+{
+    PlatformSetMotorSpeedReq req = message->platformSetMotorSpeedReq;
+    if (req.motor == 0)
+    {
+        speedLeft = transformSpeed(req.speedI, req.speedF);
     }
     else
     {
-        setPwmDuty(&leftControllerHandle, 0);
-//        speed = 0;
+        speedRight = transformSpeed(req.speedI, req.speedF);
     }
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }
 
 void onRun()
@@ -91,9 +99,9 @@ void onRun()
     HAL_Delay(1000);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-    int8_t speedInt;
 
     initCom(&communicationContext);
+    subscribe(&communicationContext, PLATFORM_SET_MOTOR_SPEED_REQ_ID, toggleSpeed);
 
     while (TRUE)
     {
@@ -104,7 +112,7 @@ void onRun()
             disableSpeedUpdateFlag(&rightMotorHandle);
 
 //            printf("speed: %f| pwm: %ld | error: %f \n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), error);
-            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speed);
+            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speedLeft);
 
 //            error = speed - getSpeed(&leftMotorHandle);
 

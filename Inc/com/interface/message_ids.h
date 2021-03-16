@@ -13,6 +13,6 @@
 #define PLATFORM_SET_MOTOR_SPEED_REQ_ID 0x01  // -> PlatformSetSpeedReq
 #define PLATFORM_SET_MOTOR_SPEED_RESP_ID 0x02  // -> PlatformSetSpeedResp
 
-#define MESSAGES_NUM 1
+#define MESSAGES_NUM 1  // Number of IF messages that can be sent to platform
 
 #endif //MOTORDRIVER_MESSAGE_IDS_H
