@@ -48,8 +48,8 @@ uint16_t addSubscription(SubscriptionContainer* container, uint8_t messageId, Me
     new->handlerPtr = handler;
 
     (*current) = new;
-
-    return container->subscriptionsCounter++;
+    container->subscriptionsCounter = container->subscriptionsCounter + 1;
+    return container->subscriptionsCounter - 1;
 }
 
 void removeSubscription(SubscriptionContainer* container, uint16_t subscriptionId)
@@ -80,11 +80,11 @@ int subscriptionExists(SubscriptionContainer* container, uint8_t messageId)
 {
     struct Subscription* current = container->first;
     const int SUBSCRIPTION_EXITS = 0;
-    const int SUBSCRIPTION_DOES_NOT_EXIT = 1;
+    const int SUBSCRIPTION_DOES_NOT_EXIST = 1;
     if (current == NULL)
     {
         printf("Subscription for %d does not exist!\r\n", messageId);
-        return SUBSCRIPTION_DOES_NOT_EXIT;
+        return SUBSCRIPTION_DOES_NOT_EXIST;
     }
 
     while (current->next != NULL)
@@ -94,7 +94,7 @@ int subscriptionExists(SubscriptionContainer* container, uint8_t messageId)
             return SUBSCRIPTION_EXITS;
         }
     }
-    return SUBSCRIPTION_DOES_NOT_EXIT;
+    return SUBSCRIPTION_DOES_NOT_EXIST;
 }
 
 struct HandlersList getHandlersForMessageId(SubscriptionContainer* container, uint8_t messageId)
@@ -103,15 +103,16 @@ struct HandlersList getHandlersForMessageId(SubscriptionContainer* container, ui
     struct HandlerNode** currentHandlerNode = &list.head;
     struct Subscription* currentSubscription = container->first;
 
-    while (currentSubscription->next != NULL)
+    while (currentSubscription != NULL)
     {
         if (currentSubscription->messageId == messageId)
         {
-            (*currentHandlerNode) = malloc(sizeof(struct HandlerNode));
+            (*currentHandlerNode) = (struct HandlerNode*)malloc(sizeof(struct HandlerNode));
             (*currentHandlerNode)->messageHandler = currentSubscription->handlerPtr;
             (*currentHandlerNode)->next = NULL;
-            (*currentHandlerNode) = (*currentHandlerNode)->next;
+            currentHandlerNode = &(*currentHandlerNode)->next;
         }
+        currentSubscription = currentSubscription->next;
     }
 
     return list;

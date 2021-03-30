@@ -35,5 +35,6 @@ void setLeftDirection(uint8_t direction);
 void setRightDirection(uint8_t direction);
 
 void setLeftPwm(int64_t newPwmDuty);
+void setRightPwm(int64_t newPwmDuty);
 
 #endif //MOTORDRIVER_PLATFORM_CONTROLLER_H

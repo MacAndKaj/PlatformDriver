@@ -74,15 +74,16 @@ double transformSpeed(int8_t speedInt, uint8_t speedFl)
 
 void toggleSpeed(Message* message)
 {
-    printf("Toggling speed\r\n");
     PlatformSetMotorSpeedReq req = message->msg.platformSetMotorSpeedReq;
     if (req.motor == 0)
     {
         speedLeft = transformSpeed(req.speedI, req.speedF);
+        printf("New left speed: %f\r\n", speedLeft);
     }
     else
     {
         speedRight = transformSpeed(req.speedI, req.speedF);
+        printf("New right speed: %f\r\n", speedRight);
     }
 }
 
@@ -94,9 +95,8 @@ void onRun()
         .kD = 30.};
 
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    HAL_Delay(1000);
+    HAL_Delay(300);
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
 
     initCom(&communicationContext);
     subscribe(&communicationContext, PLATFORM_SET_MOTOR_SPEED_REQ_ID, toggleSpeed);
@@ -107,14 +107,19 @@ void onRun()
         if (isSpeedUpdateFlagSet(&leftMotorHandle))
         {
             disableSpeedUpdateFlag(&leftMotorHandle);
-            disableSpeedUpdateFlag(&rightMotorHandle);
-
-//            printf("speed: %f| pwm: %ld | error: %f \n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), error);
-//            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speedLeft);
 
             error = speedLeft - getSpeed(&leftMotorHandle);
 
             setLeftPwm(evaluate(&pid, error, speedUpdateTime));
+        }
+
+        if (isSpeedUpdateFlagSet(&rightMotorHandle))
+        {
+            disableSpeedUpdateFlag(&rightMotorHandle);
+
+            error = speedRight - getSpeed(&rightMotorHandle);
+
+            setRightPwm(evaluate(&pid, error, speedUpdateTime));
         }
     }
 }

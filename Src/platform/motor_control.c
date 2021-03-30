@@ -20,6 +20,11 @@ ControllerHandle rightControllerHandle;
 
 void setPwmDuty(ControllerHandle *handle, uint32_t newPwmDuty)
 {
+    if (newPwmDuty < STOP_THRESHOLD)
+    {
+        newPwmDuty = 0;
+    }
+
     if (newPwmDuty > PWM_PERIOD)
     {
         newPwmDuty = PWM_PERIOD;

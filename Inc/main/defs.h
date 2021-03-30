@@ -25,4 +25,7 @@
 // Radius of wheels[m].
 #define R 0.033
 
+// Value of computed PWM that should drop PWM value to 0
+#define STOP_THRESHOLD 1500
+
 #endif //MOTORDRIVER_PLATFORM_DEFS_H

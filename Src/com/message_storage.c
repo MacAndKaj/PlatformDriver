@@ -33,14 +33,15 @@ MessageStorage* createMessageStorage()
 
 void addMessage(MessageStorage* messageStorage, const Message* msg)
 {
-    struct MessageBox* current = messageStorage->firstMessage;
-    while (current != NULL)
+    struct MessageBox** current = &messageStorage->firstMessage;
+    while (*current != NULL)
     {
-        current = current->next;
+        current = &(*current)->next;
     }
     struct MessageBox* new = malloc(sizeof(struct MessageBox));
     new->message = *msg;
     new->next = NULL;
+    (*current) = new;
     printf("Added message with id %d\r\n", msg->messageId);
 }
 
