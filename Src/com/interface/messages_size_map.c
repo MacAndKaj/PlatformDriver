@@ -17,8 +17,7 @@ Node map[MESSAGES_NUM] = {
 
 Node* findSizeForMessageId(uint8_t id)
 {
-    int i = 0;
-    for ( ; i < MESSAGES_NUM; i = i + 1)
+    for (int i = 0 ; i < MESSAGES_NUM; i = i + 1)
     {
         if (map[i].id == id) return &map[i];
     }

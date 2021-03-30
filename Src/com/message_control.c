@@ -16,6 +16,7 @@
 #include <com/interface/ser_des/serializers/PlatformSetMotorSpeed.h>
 
 #include <stddef.h>
+#include <malloc.h>
 
 int validateCtrlData(MessageControl* messageControl, const uint8_t data[HEADER_SIZE])
 {
@@ -44,12 +45,17 @@ char* serialize(void* resp, uint8_t id)
     return NULL;
 }
 
-void* deserialize(char* data, uint8_t id)
+Message* deserialize(char* data, uint8_t id)
 {
+    struct Message* message = malloc(sizeof(struct Message));
+    message->messageId=id;
     switch (id)
     {
         case PLATFORM_SET_MOTOR_SPEED_REQ_ID:
-            return deserialize_PlatformSetMotorSpeedReq(data);
+            message->msg.platformSetMotorSpeedReq = *deserialize_PlatformSetMotorSpeedReq(data);
+            return message;
+        default:
+            free(message);
     }
     return NULL;
 }

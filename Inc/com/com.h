@@ -20,7 +20,7 @@ struct RxBuffer
 {
     uint8_t newData;
     uint8_t *data;
-    enum DataTypes nextRead;
+    enum DataType nextRead;
 };
 typedef struct RxBuffer RxBuffer;
 

@@ -19,7 +19,7 @@ enum Status
 // Message status end
 
 // Message status begin
-enum DataTypes
+enum DataType
 {
     FrameCtrlData,
     UserData
@@ -31,7 +31,5 @@ enum DataTypes
 #define HEADER_SIZE FRAME_CTRL_DATA_SIZE + MESSAGE_CTRL_DATA_SIZE
 
 #define FRAME_CTRL_DATA 0xF0
-
-#define WAITING_FOR_ID 0x00
 
 #endif //MOTORDRIVER_CONSTS_H

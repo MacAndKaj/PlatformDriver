@@ -15,7 +15,18 @@
 #include <main/log.h>
 
 #include <malloc.h>
-#include <memory.h>
+
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+
 
 /*
  * STRUCTURES FUNCTIONS DECLARATIONS BEGIN
@@ -28,13 +39,15 @@ void startUartRx(RxBuffer *rxBuffer, uint16_t N);
 
 uint8_t isNewData(RxBuffer *rxBuffer);
 
-enum DataTypes nextReadType(RxBuffer *rxBuffer);
+enum DataType nextReadType(RxBuffer *rxBuffer);
 
-void scheduleNextRead(CommunicationContext *communicationContext, enum DataTypes dataType);
+void setNextMessageId(CommunicationContext *communicationContext, uint8_t newNextReadMessageId);
+
+void setNextReadType(CommunicationContext *communicationContext, enum DataType dataType);
 
 void clearBuffer(RxBuffer *rxBuffer);
 
-enum DataTypes processFrameCtrlData(CommunicationContext* communicationContext);
+enum DataType processFrameCtrlData(CommunicationContext* communicationContext);
 
 void processUserData(CommunicationContext* communicationContext);
 
@@ -65,36 +78,42 @@ void workCom(CommunicationContext *communicationContext)
         return;
     }
 
+    enum DataType newNextRead;
     switch (nextReadType(&communicationContext->rxBuffer))
     {
         case FrameCtrlData:
         {
-            scheduleNextRead(communicationContext, processFrameCtrlData(communicationContext));
+            printf("Received FrameCtrlData\r\n");
+            newNextRead = processFrameCtrlData(communicationContext);
             break;
         }
         case UserData:
         {
+            printf("Received UserData\r\n");
             processUserData(communicationContext);
-            scheduleNextRead(communicationContext, FrameCtrlData);
+            newNextRead = FrameCtrlData;
             break;
         }
         default:
         {
             printf("Incorrect data type: %d\n", nextReadType(&communicationContext->rxBuffer));
-            scheduleNextRead(communicationContext, FrameCtrlData);
+            newNextRead = FrameCtrlData;
         }
     }
 
     uint16_t nextReadDataSize = HEADER_SIZE;
-    if (nextReadType(&communicationContext->rxBuffer) == UserData)
+    if (newNextRead == UserData)
     {
-        nextReadDataSize = getMessageSize(communicationContext->msgControl.nextReadMessageId);
+        nextReadDataSize = getMessageSize(communicationContext->rxBuffer.data[1]);
     }
+    printf("Next read will have %d bytes\r\n", nextReadDataSize);
 
     clearBuffer(&communicationContext->rxBuffer);
     startUartRx(&communicationContext->rxBuffer, nextReadDataSize);
 
     processSubscriptions(&communicationContext->msgControl);
+    setNextMessageId(communicationContext, newNextRead);
+    setNextReadType(communicationContext, newNextRead);
 }
 
 void comReceiveCallback(UART_HandleTypeDef *huart, CommunicationContext *communicationContext)
@@ -133,12 +152,13 @@ void newRxData(RxBuffer *rxBuffer)
 
 void startUartRx(RxBuffer *rxBuffer, uint16_t N)
 {
+    printf("UART receiving DMA start for %d bytes\n", N);
     rxBuffer->data = (uint8_t *) malloc(N * sizeof(uint8_t));
     HAL_StatusTypeDef status = HAL_UART_Receive_DMA(&huart2, rxBuffer->data, N);
 
     if (status != HAL_OK)
     {
-        printf("%d\n", status);
+        printf("UART receiving DMA start failed with status: %d\n", status);
     }
 }
 
@@ -152,21 +172,19 @@ uint8_t isNewData(RxBuffer *rxBuffer)
     return rxBuffer->newData;
 }
 
-enum DataTypes nextReadType(RxBuffer *rxBuffer)
+enum DataType nextReadType(RxBuffer *rxBuffer)
 {
     return rxBuffer->nextRead;
 }
 
-void scheduleNextRead(CommunicationContext *communicationContext, enum DataTypes dataType)
+void setNextMessageId(CommunicationContext *communicationContext, uint8_t newNextReadMessageId)
+{
+    communicationContext->msgControl.nextReadMessageId = newNextReadMessageId;
+}
+
+void setNextReadType(CommunicationContext *communicationContext, enum DataType dataType)
 {
     communicationContext->rxBuffer.nextRead = dataType;
-
-    if (dataType == UserData)
-    {
-        communicationContext->msgControl.nextReadMessageId = communicationContext->rxBuffer.data[1];
-        return;
-    }
-    communicationContext->msgControl.nextReadMessageId = WAITING_FOR_ID;
 }
 
 void clearBuffer(RxBuffer *rxBuffer)
@@ -178,8 +196,7 @@ void clearBuffer(RxBuffer *rxBuffer)
     noNewRxData(rxBuffer);
 }
 
-
-enum DataTypes processFrameCtrlData(CommunicationContext* communicationContext)
+enum DataType processFrameCtrlData(CommunicationContext* communicationContext)
 {
     int status = validateCtrlData(&communicationContext->msgControl, communicationContext->rxBuffer.data);
 
@@ -192,19 +209,16 @@ enum DataTypes processFrameCtrlData(CommunicationContext* communicationContext)
 
 void processUserData(CommunicationContext* communicationContext)
 {
-    void* msg = deserialize((char*)communicationContext->rxBuffer.data,communicationContext->msgControl.nextReadMessageId);
+    struct Message* deserializedMsg = deserialize((char*)communicationContext->rxBuffer.data,
+        communicationContext->msgControl.nextReadMessageId);
 
-    if (msg == NULL)
+    if (deserializedMsg == NULL)
     {
         printf("Unknown message\n");
         return;
     }
 
-    Message temp;
-    memcpy(&temp, msg, getMessageSize(communicationContext->msgControl.nextReadMessageId));
-    free(msg);
-
-    addMessage(communicationContext->msgControl.storage, &temp);
+    addMessage(communicationContext->msgControl.storage, deserializedMsg);
 }
 
 /*

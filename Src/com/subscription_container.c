@@ -10,6 +10,7 @@
 
 #include <com/subscriptions_container.h>
 #include <malloc.h>
+#include <stdio.h>
 
 struct Subscription
 {
@@ -35,18 +36,18 @@ SubscriptionContainer* createSubscriptionContainer()
 
 uint16_t addSubscription(SubscriptionContainer* container, uint8_t messageId, MessageHandler handler)
 {
-    struct Subscription* current = container->first;
-    while (current != NULL)
+    struct Subscription** current = &container->first;
+    while (*current != NULL)
     {
-        current = current->next;
+        current = &(*current)->next;
     }
-
+    printf("Creating subscription for messageId = %d!\r\n", messageId);
     struct Subscription* new = malloc(sizeof(struct Subscription));
     new->next = NULL;
     new->messageId = messageId;
     new->handlerPtr = handler;
 
-    current->next = new;
+    (*current) = new;
 
     return container->subscriptionsCounter++;
 }
@@ -82,6 +83,7 @@ int subscriptionExists(SubscriptionContainer* container, uint8_t messageId)
     const int SUBSCRIPTION_DOES_NOT_EXIT = 1;
     if (current == NULL)
     {
+        printf("Subscription for %d does not exist!\r\n", messageId);
         return SUBSCRIPTION_DOES_NOT_EXIT;
     }
 

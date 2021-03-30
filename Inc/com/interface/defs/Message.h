@@ -19,7 +19,7 @@ struct Message
     {
         PlatformSetMotorSpeedReq platformSetMotorSpeedReq;
         PlatformSetMotorSpeedResp platformSetMotorSpeedResp;
-    };
+    } msg;
 };
 typedef struct Message Message;
 

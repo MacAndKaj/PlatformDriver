@@ -11,6 +11,7 @@
 #include <com/message_storage.h>
 #include <stddef.h>
 #include <malloc.h>
+#include <stdio.h>
 
 struct MessageBox
 {
@@ -26,6 +27,7 @@ struct MessageStorage
 MessageStorage* createMessageStorage()
 {
     struct MessageStorage* ptr = malloc(sizeof(struct MessageStorage));
+    ptr->firstMessage = NULL;
     return ptr;
 }
 
@@ -39,6 +41,7 @@ void addMessage(MessageStorage* messageStorage, const Message* msg)
     struct MessageBox* new = malloc(sizeof(struct MessageBox));
     new->message = *msg;
     new->next = NULL;
+    printf("Added message with id %d\r\n", msg->messageId);
 }
 
 Message popMessage(MessageStorage* messageStorage)

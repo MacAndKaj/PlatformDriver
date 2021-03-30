@@ -33,24 +33,21 @@ int init_Modules()
     state = HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, &leftControllerHandle.pwmDuty, ONE_WORD);
     if (state != HAL_OK)
     {
+        printf("Left Motor PWM start failed\r\n");
         return 1;
     }
 
     state = HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1, &rightControllerHandle.pwmDuty, ONE_WORD);
     if (state != HAL_OK)
     {
+        printf("Right Motor PWM start failed\r\n");
         return 1;
     }
 
     state = HAL_TIM_Base_Start_IT(&htim17);
     if (state != HAL_OK)
     {
-        return 1;
-    }
-
-    state = HAL_TIM_Base_Start_IT(&htim17);
-    if (state != HAL_OK)
-    {
+        printf("Timer start failed\r\n");
         return 1;
     }
 
@@ -77,7 +74,8 @@ double transformSpeed(int8_t speedInt, uint8_t speedFl)
 
 void toggleSpeed(Message* message)
 {
-    PlatformSetMotorSpeedReq req = message->platformSetMotorSpeedReq;
+    printf("Toggling speed\r\n");
+    PlatformSetMotorSpeedReq req = message->msg.platformSetMotorSpeedReq;
     if (req.motor == 0)
     {
         speedLeft = transformSpeed(req.speedI, req.speedF);
@@ -112,17 +110,27 @@ void onRun()
             disableSpeedUpdateFlag(&rightMotorHandle);
 
 //            printf("speed: %f| pwm: %ld | error: %f \n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), error);
-            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speedLeft);
+//            printf("%f|%ld|data: %f\r\n", getSpeed(&leftMotorHandle), getPwmDuty(&leftControllerHandle), speedLeft);
 
-//            error = speed - getSpeed(&leftMotorHandle);
+            error = speedLeft - getSpeed(&leftMotorHandle);
 
-//            setLeftPwm(evaluate(&pid, error, speedUpdateTime));
+            setLeftPwm(evaluate(&pid, error, speedUpdateTime));
         }
     }
 }
 
 void onExtInterrupt(uint16_t GPIO_Pin)
 {
+    PlatformSetMotorSpeedReq req = {
+        .motor = 0,
+        .speedI = 5,
+        .speedF = 0
+    };
+    Message msg = {
+        .messageId = PLATFORM_SET_MOTOR_SPEED_REQ_ID,
+        .msg.platformSetMotorSpeedReq = req
+    };
+
     switch (GPIO_Pin)
     {
         case LeftMotorEncoderB_Pin:
@@ -132,7 +140,7 @@ void onExtInterrupt(uint16_t GPIO_Pin)
             updateRightMotorParameters();
             break;
         case UserButton_Pin:
-            toggleSpeed();
+            toggleSpeed(&msg);
             break;
     }
 }
