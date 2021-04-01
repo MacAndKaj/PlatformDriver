@@ -13,6 +13,14 @@
 
 #include <assert.h>
 
+double getKP(const PID* pidHandle);
+double getKI(const PID* pidHandle);
+double getKD(const PID* pidHandle);
+double getLastError(const PID* pidHandle);
+void setLastError(PID* pidHandle, double val);
+double getIntegral(const PID* pidHandle);
+void setIntegral(PID* pidHandle, double val);
+
 double evaluate(PID* pid, double error, double dt)
 {
     assert(dt != 0.);

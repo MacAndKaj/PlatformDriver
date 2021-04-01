@@ -21,19 +21,14 @@ typedef struct pid
     double vI;           // Variable to keep integral of error
 } PID;
 
-///Evaluate PID TODO: describe
-/// \param pidHandle
-/// \param error
-/// \return
+///Evaluate control value from PID handle, current error and timestamp.
+/// \param pidHandle: pointer to PID structure with factors etc
+/// \param error: current error = q_d - q_c
+/// \return new control value
 double evaluate(PID* pidHandle, double error, double dt);
 
-double getKP(const PID* pidHandle);
-double getKI(const PID* pidHandle);
-double getKD(const PID* pidHandle);
-double getLastError(const PID* pidHandle);
-void setLastError(PID* pidHandle, double val);
-double getIntegral(const PID* pidHandle);
-void setIntegral(PID* pidHandle, double val);
+///
+/// \param pidHandle
 void resetPid(PID* pidHandle);
 
 #endif //MOTORDRIVER_PLATFORM_PID_H

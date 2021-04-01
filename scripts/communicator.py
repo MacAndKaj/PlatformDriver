@@ -1,4 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QWidget
+from PyQt5.QtCore import *
+
 import serial
 import numpy
 import sys
@@ -14,6 +16,7 @@ class Window(QMainWindow):
         self.setWindowTitle("PyQt5 window")
         self.show()
 
+
 class Message:
     FRAME_CTRL_DATA = 0xF0
 
@@ -26,7 +29,7 @@ class Message:
     def serialize(self):
         data = bytearray([self.FRAME_CTRL_DATA, self.message_id()])
         data.join(self.get_data())
-        data.join([self.FRAME_CTRL_DATA.to_bytes(1,'big')])
+        data.join([self.FRAME_CTRL_DATA.to_bytes(1, 'big')])
         return data
 
 
@@ -42,7 +45,14 @@ class PlatformSetMotorSpeedReq(Message):
         return self.PLATFORM_SET_MOTOR_SPEED_REQ_ID
 
     def get_data(self):
-        return [self._motor.to_bytes(1, 'big'), self._speedI.to_bytes(1, 'big',signed=True), self._speedF.to_bytes(1, 'big')]
+        return [self._motor.to_bytes(1, 'big'), self._speedI.to_bytes(1, 'big', signed=True),
+                self._speedF.to_bytes(1, 'big')]
+
+
+def create_text_area() -> QWidget:
+    text_area = QPlainTextEdit()
+    text_area.setFocusPolicy(Qt.NoFocus)
+    return text_area
 
 
 if __name__ == '__main__':
@@ -52,7 +62,19 @@ if __name__ == '__main__':
     print(req.serialize())
 
     app = QApplication(sys.argv)
-    window = Window()
+    text_area = create_text_area()
+
+    message = QLineEdit()
+
+    window = QWidget()
+    layout = QVBoxLayout()
+
+    layout.addWidget(text_area)
+    layout.addWidget(message)
+
+    window.setLayout(layout)
+    window.show()
+    app.setActiveWindow(window)
     sys.exit(app.exec_())
 
     # port.write(req.serialize())
