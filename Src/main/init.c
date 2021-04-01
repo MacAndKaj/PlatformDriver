@@ -89,8 +89,13 @@ void toggleSpeed(Message* message)
 
 void onRun()
 {
-    double error = 0.;
-    PID pid = {.kP = 4000.,
+    double errorLeft = 0.;
+    PID pidControllerLeft = {.kP = 4000.,
+        .kI = 150.,
+        .kD = 30.};
+
+    double errorRight = 0.;
+    PID pidControllerRight = {.kP = 4000.,
         .kI = 150.,
         .kD = 30.};
 
@@ -108,18 +113,18 @@ void onRun()
         {
             disableSpeedUpdateFlag(&leftMotorHandle);
 
-            error = speedLeft - getSpeed(&leftMotorHandle);
+            errorLeft = speedLeft - getSpeed(&leftMotorHandle);
 
-            setLeftPwm(evaluate(&pid, error, speedUpdateTime));
+            setLeftPwm(evaluate(&pidControllerLeft, errorLeft, speedUpdateTime));
         }
 
         if (isSpeedUpdateFlagSet(&rightMotorHandle))
         {
             disableSpeedUpdateFlag(&rightMotorHandle);
 
-            error = speedRight - getSpeed(&rightMotorHandle);
+            errorRight = speedRight - getSpeed(&rightMotorHandle);
 
-            setRightPwm(evaluate(&pid, error, speedUpdateTime));
+            setRightPwm(evaluate(&pidControllerRight, errorRight, speedUpdateTime));
         }
     }
 }
