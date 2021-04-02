@@ -1,4 +1,7 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QWidget
+import typing
+
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QWidget, QTabWidget
 from PyQt5.QtCore import *
 
 import serial
@@ -6,15 +9,6 @@ import numpy
 import sys
 
 dev = '/dev/ttyACM0'
-
-
-class Window(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        self.setGeometry(300, 300, 600, 400)
-        self.setWindowTitle("PyQt5 window")
-        self.show()
 
 
 class Message:
@@ -49,17 +43,76 @@ class PlatformSetMotorSpeedReq(Message):
                 self._speedF.to_bytes(1, 'big')]
 
 
-def create_text_area() -> QWidget:
-    text_area = QPlainTextEdit()
-    text_area.setFocusPolicy(Qt.NoFocus)
-    return text_area
+class CommunicatorLog(QPlainTextEdit):
+    def __init__(self):
+        super().__init__()
+        self.setFocusPolicy(Qt.NoFocus)
+
+
+class CommunicatorInputLine(QLineEdit):
+    def __init__(self) -> None:
+        super().__init__()
+        self.input_text = ""
+
+        self.returnPressed.connect(self.on_return_pressed)
+        self.textChanged.connect(self.on_text_changed)
+
+    def on_return_pressed(self):
+        print(self.input_text)
+        self.clear()
+
+    def on_text_changed(self, text):
+        self.input_text = text
 
 
 def create_message_line_edit() -> QWidget:
-    on_return_pressed = lambda : print("pressed ")
-    message = QLineEdit()
-    message.returnPressed.connect(on_return_pressed)
-    return message
+    def on_return_pressed():
+        global input_text
+        print(input_text)
+
+    def on_text_changed(text):
+        global input_text
+        input_text = text
+
+    messageLine = QLineEdit()
+    return messageLine
+
+
+class Window(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setGeometry(0, 0, 600, 400)
+        self.setWindowTitle("MCD Communicator")
+        central_widget = QTabWidget()
+
+        self._free_communicator_tab = self.configure_free_communicator()
+        central_widget.addTab(self._free_communicator_tab, "Free Communicator")
+
+        self._message_communicator = QWidget()
+        central_widget.addTab(self._message_communicator, "Message Communicator")
+
+        self.setCentralWidget(central_widget)
+        self.show()
+
+    def configure_free_communicator(self) -> QWidget:
+        free_communicator = QWidget()
+        layout = QVBoxLayout()
+
+        communicator_log = CommunicatorLog()
+        communicator_input_line = CommunicatorInputLine()
+
+        layout.addWidget(communicator_log)
+        layout.addWidget(communicator_input_line)
+
+        free_communicator.setLayout(layout)
+        return free_communicator
+
+
+class Port(QObject):
+
+    def __init__(self):
+        self._port = serial.Serial(dev, timeout=1, baudrate=115200)
 
 
 if __name__ == '__main__':
@@ -69,18 +122,8 @@ if __name__ == '__main__':
     print(req.serialize())
 
     app = QApplication(sys.argv)
-    text_area = create_text_area()
 
-    message = create_message_line_edit()
-
-    window = QWidget()
-    layout = QVBoxLayout()
-    layout.addWidget(text_area)
-    layout.addWidget(message)
-
-    window.setLayout(layout)
-    window.show()
-    app.setActiveWindow(window)
+    window = Window()
     sys.exit(app.exec_())
 
     # port.write(req.serialize())
