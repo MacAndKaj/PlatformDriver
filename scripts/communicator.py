@@ -1,11 +1,7 @@
-import typing
-
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QWidget, QTabWidget
 from PyQt5.QtCore import *
 
 import serial
-import numpy
 import sys
 
 dev = '/dev/ttyACM0'
@@ -93,6 +89,7 @@ class Window(QMainWindow):
         central_widget.addTab(self._message_communicator, "Message Communicator")
 
         self.setCentralWidget(central_widget)
+        self.setFocus()
         self.show()
 
     def configure_free_communicator(self) -> QWidget:
