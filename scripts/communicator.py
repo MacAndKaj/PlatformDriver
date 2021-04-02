@@ -55,6 +55,13 @@ def create_text_area() -> QWidget:
     return text_area
 
 
+def create_message_line_edit() -> QWidget:
+    on_return_pressed = lambda : print("pressed ")
+    message = QLineEdit()
+    message.returnPressed.connect(on_return_pressed)
+    return message
+
+
 if __name__ == '__main__':
     # port = serial.Serial(dev, timeout=1, baudrate=115200)
 
@@ -64,11 +71,10 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     text_area = create_text_area()
 
-    message = QLineEdit()
+    message = create_message_line_edit()
 
     window = QWidget()
     layout = QVBoxLayout()
-
     layout.addWidget(text_area)
     layout.addWidget(message)
 
